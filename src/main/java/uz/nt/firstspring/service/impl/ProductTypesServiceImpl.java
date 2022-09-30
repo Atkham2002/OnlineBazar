@@ -3,6 +3,7 @@ package uz.nt.firstspring.service.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import uz.nt.firstspring.dto.ProductDto;
 import uz.nt.firstspring.dto.ProductTypeDto;
 import uz.nt.firstspring.dto.ResponseDto;
@@ -12,6 +13,7 @@ import uz.nt.firstspring.repository.impl.ProductTypeRepositoryImpl;
 import uz.nt.firstspring.service.ProductTypesService;
 import uz.nt.firstspring.service.mapper.MapperProductType;
 import uz.nt.firstspring.service.mapper.ProductTypesMapper;
+import uz.nt.firstspring.service.mapper.UnitMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +27,7 @@ public class ProductTypesServiceImpl implements ProductTypesService {
     private final ProductTypesRepository repository;
     private final ProductTypesMapper mapper;
     private final ProductTypeRepositoryImpl productTypeRepositoryImpl;
-
+    private final UnitMapper unitMapper;
 
     @Override
     public ResponseDto<String> addProduct(ProductTypeDto dto) {
@@ -38,11 +40,16 @@ public class ProductTypesServiceImpl implements ProductTypesService {
         }
     }
 
+    @Transactional
+    public List<ProductTypes> getProductTypes() {
+        return repository.findAll();
+    }
+
     @Override
     public ResponseDto<List<ProductTypeDto>> getAll() {
         List<ProductTypes> productTypes = repository.findAll();
         List<ProductTypeDto> productTypeDto = productTypes.stream()
-                .map(MapperProductType::toDto)
+                .map(m -> MapperProductType.toDto(m, unitMapper))
                 .collect(Collectors.toList());
 
         return ResponseDto.<List<ProductTypeDto>>builder().message("OK").success(true).data(productTypeDto).build();
@@ -65,7 +72,7 @@ public class ProductTypesServiceImpl implements ProductTypesService {
         return ResponseDto.<ProductTypeDto>builder()
                 .message("OK")
                 .success(true)
-                .data(_productTypes.map(MapperProductType::toDto).get())
+                .data(_productTypes.map(m -> MapperProductType.toDto(m, unitMapper)).get())
                 .build();
     }
 }

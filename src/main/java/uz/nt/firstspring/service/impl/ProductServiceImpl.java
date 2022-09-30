@@ -12,13 +12,16 @@ import uz.nt.firstspring.entity.Product;
 import uz.nt.firstspring.repository.ProductRepository;
 import uz.nt.firstspring.repository.ProductTypesRepository;
 import uz.nt.firstspring.repository.impl.ProductRepositoryImpl;
+import uz.nt.firstspring.service.ExcelService;
 import uz.nt.firstspring.service.ProductService;
 import uz.nt.firstspring.service.ValidatorService;
 import uz.nt.firstspring.service.mapper.MapperProduct;
 import uz.nt.firstspring.service.mapper.ProductMapper;
+import uz.nt.firstspring.service.mapper.UnitMapper;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -30,14 +33,18 @@ public class ProductServiceImpl implements ProductService {
     private final ProductRepositoryImpl productRepositoryImpl;
     private final ValidatorService validator;
     private final ProductTypesRepository productTypesRepository;
+    private final UnitMapper unitMapper;
+    private final ExcelService excelService;
 
-    public ProductServiceImpl(ProductRepository productRepository, ProductMapper productMapper, ProductRepositoryImpl productRepositoryImpl, ValidatorService validator, ProductTypesRepository productTypesRepository) {
+    public ProductServiceImpl(ProductRepository productRepository, ProductMapper productMapper, ProductRepositoryImpl productRepositoryImpl, ValidatorService validator, ProductTypesRepository productTypesRepository, UnitMapper unitMapper, ExcelService excelService) {
         this.productRepository = productRepository;
 //        productMapper = Mappers.getMapper(ProductMapper.class);
         this.productMapper = productMapper;
         this.productRepositoryImpl = productRepositoryImpl;
         this.validator = validator;
         this.productTypesRepository = productTypesRepository;
+        this.unitMapper = unitMapper;
+        this.excelService = excelService;
     }
 
     @Override
@@ -81,7 +88,7 @@ public class ProductServiceImpl implements ProductService {
     public ResponseDto<Page<ProductDto>> getAll(Integer page, Integer size) {
         PageRequest request = PageRequest.of(page, size);
 
-        Page<ProductDto> list = productRepository.findAll(request).map(MapperProduct::toDto);
+        Page<ProductDto> list = productRepository.findAll(request).map(m -> MapperProduct.toDto(m,unitMapper));
 
         return ResponseDto.<Page<ProductDto>>builder().code(0).message("OK").success(true).data(list).build();
     }
@@ -90,7 +97,7 @@ public class ProductServiceImpl implements ProductService {
     public ResponseDto<Page<ProductDto>> search(String name, Integer page, Integer size) {
         PageRequest pageRequest = PageRequest.of(page, size);
         Page<ProductDto> result = productRepository.findAllByNameContainingIgnoreCase(name, pageRequest)
-                .map(MapperProduct::toDto);
+                .map(m -> MapperProduct.toDto(m,unitMapper));
         return ResponseDto.<Page<ProductDto>>builder().message("OK").data(result).success(true).code(0).build();
     }
 
@@ -102,9 +109,19 @@ public class ProductServiceImpl implements ProductService {
 
         PageRequest pageRequest = PageRequest.of(Integer.parseInt(params.getFirst("page")), Integer.parseInt(params.getFirst("size")));
 
-        Page<ProductDto> result = productRepositoryImpl.findAllByParam(pageRequest, params).map(MapperProduct::toDto);
+        Page<ProductDto> result = productRepositoryImpl.findAllByParam(pageRequest, params).map(m -> MapperProduct.toDto(m,unitMapper));
 
         return ResponseDto.<Page<ProductDto>>builder().data(result).success(true).code(0).message("OK").build();
+    }
+
+    @Override
+    public void exportLessThanLimit() {
+        List<Product> products = productRepository.getLessThanLimit();
+        if(products.isEmpty()) return;
+
+        List<ProductDto> productDtos = products.stream().map(p -> MapperProduct.toDto(p, unitMapper)).collect(Collectors.toList());
+
+        excelService.exportLessProducts(productDtos);
     }
 
 

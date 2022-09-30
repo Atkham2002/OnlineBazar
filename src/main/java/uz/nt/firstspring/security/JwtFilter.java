@@ -8,6 +8,8 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import uz.nt.firstspring.dto.UserInfoDto;
+import uz.nt.firstspring.entity.UserSession;
+import uz.nt.firstspring.repository.RedisRepository;
 import uz.nt.firstspring.service.impl.UserService;
 import uz.nt.firstspring.utils.NumberUtil;
 
@@ -17,12 +19,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Optional;
 
 @Component
 @RequiredArgsConstructor
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
+
+    private final RedisRepository redisRepository;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -32,26 +37,32 @@ public class JwtFilter extends OncePerRequestFilter {
             if (jwtUtil.validateToken(token)) {
                 Long id = NumberUtil.toLong(jwtUtil.getClaim(token, "sub"));
                 if (id != null) {
-                    UserInfoDto userInfoDto = UserService.users.get(id);
+//                    UserInfoDto userInfoDto = UserService.users.get(id);
+                      Optional<UserSession> userSession = redisRepository.findById(id);
 
-                    if (userInfoDto != null) {
-                        UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userInfoDto,
-                                null,
-                                userInfoDto.getAuthorities());
+                      if (userSession.isPresent()) {
+
+                          UserInfoDto userInfoDto = userSession.get().getUserInfoDto();
+
+                          if (userInfoDto != null) {
+                              UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userInfoDto,
+                                      null,
+                                      userInfoDto.getAuthorities());
 
 //                WebAuthenticationDetails details = new WebAuthenticationDetailsSource().buildDetails(request);
-                        HashMap<String, String> details = new HashMap<>();
-                        details.put("address", request.getRemoteAddr());
-                        details.put("session", request.getSession().getId());
-                        auth.setDetails(details);
+                              HashMap<String, String> details = new HashMap<>();
+                              details.put("address", request.getRemoteAddr());
+                              details.put("session", request.getSession().getId());
+                              auth.setDetails(details);
 
-                        SecurityContextHolder.getContext().setAuthentication(auth);
+                              SecurityContextHolder.getContext().setAuthentication(auth);
 
-                        //SecurityContextHolder
-                        //  SecurityContext
-                        //      Authentication
-                        //          credentials, principal, authorities, details
-                    }
+                              //SecurityContextHolder
+                              //  SecurityContext
+                              //      Authentication
+                              //          credentials, principal, authorities, details
+                          }
+                      }
                 }
             }
         }

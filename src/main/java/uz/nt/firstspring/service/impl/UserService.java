@@ -13,6 +13,8 @@ import uz.nt.firstspring.dto.LoginDTO;
 import uz.nt.firstspring.dto.ResponseDto;
 import uz.nt.firstspring.dto.UserInfoDto;
 import uz.nt.firstspring.entity.User;
+import uz.nt.firstspring.entity.UserSession;
+import uz.nt.firstspring.repository.RedisRepository;
 import uz.nt.firstspring.repository.UserRepository;
 import uz.nt.firstspring.security.JwtUtil;
 import uz.nt.firstspring.service.mapper.UserMapper;
@@ -32,6 +34,8 @@ public class UserService implements UserDetailsService {
     private final JwtUtil jwtUtil;
 
     public static HashMap<Long, UserInfoDto> users = new HashMap<>();
+
+    private final RedisRepository redisRepository;
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -71,7 +75,8 @@ public class UserService implements UserDetailsService {
         }
 
         try {
-            users.put(user.getId(), userMapper.toDto(user));
+//            users.put(user.getId(), userMapper.toDto(user));
+            redisRepository.save(new UserSession(user.getId(), userMapper.toDto(user)));
 
             String token = jwtUtil.generateToken(String.valueOf(user.getId()));
 

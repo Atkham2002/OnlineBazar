@@ -18,4 +18,6 @@ public interface ProductService {
     ResponseDto<Page<ProductDto>> search(String name, Integer page, Integer size);
 
     ResponseDto<Page<ProductDto>> byParams(MultiValueMap<String, String> params);
+
+    void exportLessThanLimit();
 }
