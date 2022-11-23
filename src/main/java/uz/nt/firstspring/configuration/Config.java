@@ -1,9 +1,12 @@
 package uz.nt.firstspring.configuration;
 
+import feign.Logger;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.core.env.Environment;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -28,7 +31,15 @@ public class Config {
 
     @Bean
     public ResourceBundle resourceBundle(){
-        return ResourceBundle.getBundle("mes");
+        return ResourceBundle.getBundle("message");
+    }
+
+    @Bean
+    public MessageSource messageSource(){
+        ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
+        messageSource.setBasename("message");
+
+        return messageSource;
     }
 }
 //localization

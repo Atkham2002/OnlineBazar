@@ -52,6 +52,9 @@ public class ProductRepositoryImpl {
         if (params.containsKey("amount")){
             builder.append(" AND t.amount = :amount");
         }
+        if (params.containsKey("typeId")){
+            builder.append(" AND t.type_Id = :typeId");
+        }
     }
 
     private void setParameter(MultiValueMap<String, String> params, Query query){
@@ -63,6 +66,9 @@ public class ProductRepositoryImpl {
         }
         if (params.containsKey("amount")){
             query.setParameter("amount", Integer.parseInt(params.getFirst("amount")));
+        }
+        if (params.containsKey("typeId")){
+            query.setParameter("typeId", Integer.parseInt(params.getFirst("typeId")));
         }
     }
 

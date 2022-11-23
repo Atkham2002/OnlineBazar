@@ -1,8 +1,8 @@
 package uz.nt.firstspring.service.impl;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -11,9 +11,12 @@ import uz.nt.firstspring.dto.ProductDto;
 import uz.nt.firstspring.dto.ResponseDto;
 
 import java.util.List;
+import java.util.ResourceBundle;
 
 @Service
+@RequiredArgsConstructor
 public class RestService {
+    private final ResourceBundle bundle;
 
     public ResponseEntity<ResponseDto> getProductById(Integer id){
         RestTemplate restTemplate = new RestTemplate();
@@ -51,10 +54,10 @@ public class RestService {
         RestTemplate restTemplate = new RestTemplate();
         try {
             restTemplate.delete("http://192.168.7.35:8080/api/product/" + id);
-            return ResponseEntity.ok(ResponseDto.builder().message("Deleted successfully!").data(null).code(0).success(true).build());
+            return ResponseEntity.ok(ResponseDto.builder().message(bundle.getString("response.deleted")).data(null).code(0).success(true).build());
         }catch (Exception e){
             e.printStackTrace();
-            return ResponseEntity.status(500).body(ResponseDto.builder().message("Failed successfully!").data(null).code(-1).success(false).build());
+            return ResponseEntity.status(500).body(ResponseDto.builder().message(bundle.getString("response.failed")).data(null).code(-1).success(false).build());
         }
     }
 }

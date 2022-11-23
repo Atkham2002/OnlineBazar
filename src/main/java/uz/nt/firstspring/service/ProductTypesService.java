@@ -2,7 +2,6 @@ package uz.nt.firstspring.service;
 
 import uz.nt.firstspring.dto.ProductTypeDto;
 import uz.nt.firstspring.dto.ResponseDto;
-import uz.nt.firstspring.entity.ProductTypes;
 
 import java.util.List;
 

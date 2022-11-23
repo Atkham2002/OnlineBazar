@@ -1,41 +1,41 @@
 package uz.nt.firstspring.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static java.lang.Math.sqrt;
+import javax.servlet.http.HttpServletRequest;
+import java.util.Locale;
 
 @RestController
+@RequestMapping("/hello")
+@Schema(name = "№1. Hello")
+@RequiredArgsConstructor
 public class HelloController {
 
-    public static ArrayList<Integer> primes = new ArrayList<>();
+    private final MessageSource messageSource;
 
-    @GetMapping(value = "/hello")
-    public List<Integer> prime_collection(@RequestParam  Integer number){
-        int i = 2;
-        while (i <= number){
-            if (is_prime(i)) primes.add(i);
-            i++;
-        }
-        return primes;
+    @Tag(name="External", description = "Returns list of products by page and size")
+    @Operation(summary = "№1.1 Hello by name")
+    @GetMapping(value = "/by-name")
+    public String hello(HttpServletRequest req, @RequestParam(value = "ism", required = true) String name,
+                        @RequestParam Integer age){
+        Locale locale = req.getLocale();
+        if (name.equals("Sardor"))
+            return "Hello, theSardor";
+
+        return messageSource.getMessage("hello.", new String[]{"Sardor"}, "Default message", locale);
     }
 
-    public boolean is_prime(Integer num){
-        int i = 2;
-        int count = 0;
-        while(sqrt(num) >= i){
-            if(num % i == 0){
-                count++;
-            }
-            i++;
-        }
-
-        return count == 0;
-    }
+//    @PostMapping
+//    @Operation(summary = "№1.2 Post hello")
+//    public String helloPost(){
+//        hello("", 1);
+//        return "hello post";
+//    }
 
 }

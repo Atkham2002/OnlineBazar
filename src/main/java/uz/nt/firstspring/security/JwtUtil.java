@@ -8,8 +8,6 @@ import org.springframework.stereotype.Component;
 import uz.nt.firstspring.utils.DateUtil;
 
 import java.security.InvalidKeyException;
-import java.security.Key;
-import java.security.interfaces.RSAKey;
 import java.util.Date;
 
 @Component

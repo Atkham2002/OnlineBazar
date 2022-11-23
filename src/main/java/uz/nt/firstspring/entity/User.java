@@ -1,6 +1,5 @@
 package uz.nt.firstspring.entity;
 
-import lombok.Builder;
 import lombok.Data;
 
 import javax.persistence.*;
@@ -10,7 +9,6 @@ import java.util.Set;
 
 @Entity
 @Data
-@Builder
 @Table(name = "users")
 public class User {
     @Id

@@ -4,15 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import uz.nt.firstspring.components.StringHelper;
+import uz.nt.firstspring.repository.StudentRepository;
 import uz.nt.firstspring.dto.ResponseDto;
 import uz.nt.firstspring.dto.StudentDto;
 import uz.nt.firstspring.entity.Student;
-import uz.nt.firstspring.repository.StudentRepository;
 import uz.nt.firstspring.service.StudentService;
 
 import javax.annotation.PreDestroy;
 import java.util.Date;
 import java.util.List;
+import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 @Lazy(value = false)
@@ -21,6 +22,7 @@ public class StudentServiceImpl implements StudentService {
 
     private StudentRepository studentRepository;
     private final StringHelper stringHelper;
+    private ResourceBundle bundle;
 
     public StudentServiceImpl(StringHelper stringHelper) {
         this.stringHelper = stringHelper;
@@ -31,7 +33,12 @@ public class StudentServiceImpl implements StudentService {
         this.studentRepository = studentRepository;
     }
 
-//    @PostConstruct
+    @Autowired
+    public void setBundle(ResourceBundle bundle) {
+        this.bundle = bundle;
+    }
+
+    //    @PostConstruct
 //    public void Amirxon() throws SQLException {
 //        System.out.println("Initialized service bean: " + new Date());
 //        System.out.println(Shohrux);
@@ -63,7 +70,7 @@ public class StudentServiceImpl implements StudentService {
         return ResponseDto.builder()
                 .code(0)
                 .success(true)
-                .message("Successfully saved!")
+                .message(bundle.getString("response.success"))
                 .build();
     }
 
@@ -104,7 +111,7 @@ public class StudentServiceImpl implements StudentService {
         return ResponseDto.builder()
                 .code(-1)
                 .success(false)
-                .message("Data not found!")
+                .message(bundle.getString("response.not_found"))
                 .build();
     }
 
@@ -122,13 +129,13 @@ public class StudentServiceImpl implements StudentService {
         return deleted ? ResponseDto.builder()
                 .code(0)
                 .success(true)
-                .message("Successfully deleted!")
+                .message(bundle.getString("response.deleted"))
                 .build()
                 :
                          ResponseDto.builder()
                 .code(-1)
                 .success(false)
-                .message("Data not found!")
+                .message(bundle.getString("response.not_found"))
                 .build();
     }
 }

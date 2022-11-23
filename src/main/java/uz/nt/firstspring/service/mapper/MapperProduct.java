@@ -1,7 +1,6 @@
 package uz.nt.firstspring.service.mapper;
 
 import uz.nt.firstspring.dto.ProductDto;
-import uz.nt.firstspring.dto.ProductTypeDto;
 import uz.nt.firstspring.entity.Product;
 
 public class MapperProduct {
@@ -14,7 +13,7 @@ public class MapperProduct {
                 .price(product.getPrice())
                 .build();
     }
-    public static ProductDto NoTypeToDto(Product product){
+    public static ProductDto NoTypeToDto( Product product){
         return ProductDto.builder().id(product.getId())
                 .name(product.getName())
                 .amount(product.getAmount())

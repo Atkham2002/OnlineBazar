@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 import uz.nt.firstspring.entity.UserSession;
 
 @Repository
-public interface RedisRepository extends CrudRepository<UserSession,Long> {
+public interface UserSessionRepository extends CrudRepository<UserSession, Long> {
 }

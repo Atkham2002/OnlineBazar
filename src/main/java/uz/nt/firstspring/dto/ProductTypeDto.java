@@ -12,6 +12,7 @@ import java.util.List;
 @Builder
 public class ProductTypeDto {
 
+    @NotNull
     private Integer id;
     private String name;
     private String barcode;

@@ -1,11 +1,13 @@
 package uz.nt.firstspring.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 @Slf4j
+@Component
 public class NumberUtil {
 
-    public static Long toLong(Object o) {
+    public Long toLong(Object o) {
         try {
             String value = String.valueOf(o);
             return Long.parseLong(value);

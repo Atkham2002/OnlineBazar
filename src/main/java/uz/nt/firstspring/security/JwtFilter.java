@@ -1,16 +1,16 @@
 package uz.nt.firstspring.security;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+import uz.nt.firstspring.repository.UserSessionRepository;
 import uz.nt.firstspring.dto.UserInfoDto;
 import uz.nt.firstspring.entity.UserSession;
-import uz.nt.firstspring.repository.RedisRepository;
-import uz.nt.firstspring.service.impl.UserService;
 import uz.nt.firstspring.utils.NumberUtil;
 
 import javax.servlet.FilterChain;
@@ -18,7 +18,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Optional;
 
 @Component
@@ -26,8 +25,9 @@ import java.util.Optional;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
-
-    private final RedisRepository redisRepository;
+    private final UserSessionRepository userSessionRepository;
+    @Autowired
+    private NumberUtil numberUtil;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
@@ -35,34 +35,32 @@ public class JwtFilter extends OncePerRequestFilter {
         if (authHeader != null && authHeader.startsWith("Bearer ")){
             String token = authHeader.substring(7);
             if (jwtUtil.validateToken(token)) {
-                Long id = NumberUtil.toLong(jwtUtil.getClaim(token, "sub"));
+                Long id = numberUtil.toLong(jwtUtil.getClaim(token, "sub"));
                 if (id != null) {
-//                    UserInfoDto userInfoDto = UserService.users.get(id);
-                      Optional<UserSession> userSession = redisRepository.findById(id);
+                    Optional<UserSession> userSession = userSessionRepository.findById(id);
 
-                      if (userSession.isPresent()) {
+                    if (userSession.isPresent()) {
+                        UserInfoDto userInfoDto = userSession.get().getUserInfo();
 
-                          UserInfoDto userInfoDto = userSession.get().getUserInfoDto();
+                        if (userInfoDto != null) {
+                            UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userInfoDto,
+                                    null,
+                                    userInfoDto.getAuthorities());
 
-                          if (userInfoDto != null) {
-                              UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userInfoDto,
-                                      null,
-                                      userInfoDto.getAuthorities());
+                WebAuthenticationDetails details = new WebAuthenticationDetailsSource().buildDetails(request);
+//                            HashMap<String, String> details = new HashMap<>();
+//                            details.put("address", request.getRemoteAddr());
+//                            details.put("session", request.getSession().getId());
+                            auth.setDetails(details);
 
-//                WebAuthenticationDetails details = new WebAuthenticationDetailsSource().buildDetails(request);
-                              HashMap<String, String> details = new HashMap<>();
-                              details.put("address", request.getRemoteAddr());
-                              details.put("session", request.getSession().getId());
-                              auth.setDetails(details);
+                            SecurityContextHolder.getContext().setAuthentication(auth);
 
-                              SecurityContextHolder.getContext().setAuthentication(auth);
-
-                              //SecurityContextHolder
-                              //  SecurityContext
-                              //      Authentication
-                              //          credentials, principal, authorities, details
-                          }
-                      }
+                            //SecurityContextHolder
+                            //  SecurityContext
+                            //      Authentication
+                            //          credentials, principal, authorities, details
+                        }
+                    }
                 }
             }
         }

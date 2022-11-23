@@ -10,11 +10,6 @@ import uz.nt.firstspring.dto.ProductDto;
 import uz.nt.firstspring.dto.StudentDto;
 import uz.nt.firstspring.service.ExcelService;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -26,7 +21,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
-
 @Service
 @Slf4j
 public class ExcelServiceImpl implements ExcelService {
@@ -36,10 +30,7 @@ public class ExcelServiceImpl implements ExcelService {
     }
 
     public static List<StudentDto> read() throws IOException {
-        XSSFWorkbook wb = new XSSFWorkbook(new FileInputStream(""));
-
-        SXSSFWorkbook workbook = new SXSSFWorkbook(wb,1000);
-
+        XSSFWorkbook workbook = new XSSFWorkbook(new FileInputStream("/Users/abduvokhid.ergashev/Downloads/Excel.xlsx"));
         Sheet sheet = workbook.getSheetAt(2);
         List<StudentDto> students = new ArrayList<>();
         boolean r = true;
@@ -60,37 +51,6 @@ public class ExcelServiceImpl implements ExcelService {
         }
         return students;
     }
-
-    public void writeExcelFile(Stream<ProductDto> productDtos, HttpServletResponse response) throws IOException {
-        XSSFWorkbook workbook = new XSSFWorkbook(getClass().getClassLoader().getResource("templates/Products.xlsx").openStream());
-
-        Sheet sheet = workbook.getSheetAt(0);
-
-        AtomicInteger r = new AtomicInteger(sheet.getLastRowNum());
-        AtomicInteger i = new AtomicInteger(1);
-
-        productDtos.forEach(productDto -> {
-            Row row = sheet.createRow(r.getAndIncrement());
-            row.createCell(0).setCellValue(i.getAndIncrement());
-            row.createCell(1).setCellValue(productDto.getName());
-            row.createCell(2).setCellValue(productDto.getPrice());
-            row.createCell(3).setCellValue(productDto.getAmount());
-            row.createCell(4).setCellValue(productDto.getType().getName());
-        });
-
-
-        response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-        response.setHeader("Content-Disposition","attachment; filename =\"products.xlsx\"");
-
-        workbook.write(response.getOutputStream());
-        workbook.close();
-        response.getOutputStream().close();
-    }
-
-//    public static void main(String[] args) throws IOException {
-//         List<StudentDto> student = read();
-//        System.out.println(student);
-//    }
 
     public void writeToExcel(List<StudentDto> students) throws IOException {
 
@@ -162,7 +122,7 @@ public class ExcelServiceImpl implements ExcelService {
             workbook = new SXSSFWorkbook(new XSSFWorkbook(getClass().getClassLoader().getResource("templates/control_products.xlsx").getPath()), 1000);
         } catch (IOException e) {
             log.error(e.getMessage());
-            return;
+            throw new RuntimeException("Error while reading Excel file: " + e.getMessage());
         }
 
         Sheet sheet = workbook.getSheetAt(0);
@@ -186,8 +146,8 @@ public class ExcelServiceImpl implements ExcelService {
             amount.setCellStyle(cellStyle);
             amount.setCellValue(product.getAmount());
 
-            row.createCell(6).setCellValue((RichTextString) product.getType());
-            row.createCell(7).setCellValue(String.format("%s(%s)", product.getType().getUnitId(), product.getType().getUnitId().getShortName()));
+            row.createCell(6).setCellValue(product.getType().getLimit());
+            row.createCell(7).setCellValue(String.format("%s(%s)", product.getType().getUnitId().getName(), product.getType().getUnitId().getShortName()));
         }
 
         Calendar calendar = Calendar.getInstance();
@@ -206,8 +166,6 @@ public class ExcelServiceImpl implements ExcelService {
         } catch (IOException e) {
             log.error(e.getMessage());
         }
-
-
     }
 }
 

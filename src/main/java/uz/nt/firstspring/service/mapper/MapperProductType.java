@@ -2,7 +2,6 @@ package uz.nt.firstspring.service.mapper;
 
 import uz.nt.firstspring.dto.ProductDto;
 import uz.nt.firstspring.dto.ProductTypeDto;
-import uz.nt.firstspring.entity.Product;
 import uz.nt.firstspring.entity.ProductTypes;
 
 import java.util.List;
