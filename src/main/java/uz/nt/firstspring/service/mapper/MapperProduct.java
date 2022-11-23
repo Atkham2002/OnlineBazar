@@ -14,7 +14,7 @@ public class MapperProduct {
                 .price(product.getPrice())
                 .build();
     }
-    public static ProductDto NoTypeToDto( Product product){
+    public static ProductDto NoTypeToDto(Product product){
         return ProductDto.builder().id(product.getId())
                 .name(product.getName())
                 .amount(product.getAmount())
